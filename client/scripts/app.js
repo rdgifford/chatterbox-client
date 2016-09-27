@@ -1,12 +1,11 @@
 $(document).ready(function() {
   var app = {
-    server: 'https://api.parse.com/1/classes/messages?order=-createdAt&skip=100&limit=125',
+    server: 'https://api.parse.com/1/classes/messages?order=-createdAt&skip=400&limit=22',
     init: function() {
-      this.renderRoom('test');
       this.fetch().done(function(data) {
         var rooms = _.filter(_.uniq(_.pluck(data.results, 'roomname')), x => typeof x === 'string');
         _.each(rooms, app.renderRoom);
-        _.each(data.results, app.renderMessage);
+        // app.changeRoom(rooms[0], data.results);
       });
     },  
 
@@ -43,6 +42,15 @@ $(document).ready(function() {
       $('#roomSelect').append(domRoom);
     },
 
+    changeRoom: function(room) {
+      // console.log('selected: ', room);
+      app.clearMessages();
+      this.fetch().done(function(data) {
+        var filteredMessages = _.filter(data.results, x => x.roomname === room);
+        _.each(filteredMessages, app.renderMessage);
+      });
+    },
+
     handleUsernameClick: function() {
 
     },
@@ -53,4 +61,13 @@ $(document).ready(function() {
   };
 
   app.init();
+
+  $('#roomSelect').change(function(event) {
+    app.changeRoom(event.currentTarget.value);
+  });
+
+  $('#send .submit').submit(function(event) {
+    app.handleSubmit();
+    event.preventDefault();
+  });
 });
