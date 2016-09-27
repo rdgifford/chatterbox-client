@@ -26,10 +26,11 @@ $(document).ready(function() {
 
     renderMessage: function(message) {
       message.text = app.removeTags(message.text);
+      var usernameClass = _.contains(app.friends, message.username) ? 'username friend' : 'username';
       if (message.text.length !== 0) {
         var domMes = 
           '<div>' + 
-            '<a href="" class="username">' + 
+            '<a href="" class="' + usernameClass + '">' + 
               message.username +
             '</a>' +
             '<p>' + message.text + '</p>' +
@@ -66,6 +67,7 @@ $(document).ready(function() {
       if (!_.contains(app.friends, username)) {
         app.friends.push(event.currentTarget.text);
       }
+      app.changeRoom($('#roomSelect').val());
     },
 
     handleSubmit: function(event) {
