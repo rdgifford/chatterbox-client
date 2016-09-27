@@ -2,6 +2,7 @@ $(document).ready(function() {
   var app = {
     server: 'https://api.parse.com/1/classes/messages',
     getURL: '?order=-createdAt&skip=0&limit=1000',
+    friends: [],
     init: function() {
       this.fetch().done(function(data) {
         var rooms = _.filter(_.uniq(_.pluck(data.results, 'roomname')), x => typeof x === 'string');
@@ -28,7 +29,7 @@ $(document).ready(function() {
       if (message.text.length !== 0) {
         var domMes = 
           '<div>' + 
-            '<a href="" onclick="app.handleUsernameClick()" class="username">' + 
+            '<a href="" class="username">' + 
               message.username +
             '</a>' +
             '<p>' + message.text + '</p>' +
@@ -59,8 +60,12 @@ $(document).ready(function() {
       });
     },
 
-    handleUsernameClick: function() {
-
+    handleUsernameClick: function(event) {
+      event.preventDefault();
+      var username = event.currentTarget.text;
+      if (!_.contains(app.friends, username)) {
+        app.friends.push(event.currentTarget.text);
+      }
     },
 
     handleSubmit: function(event) {
@@ -111,4 +116,6 @@ $(document).ready(function() {
   });
 
   $('#send .submit').submit(app.handleSubmit);
+
+  $(document).on('click', '.username', app.handleUsernameClick); 
 });
