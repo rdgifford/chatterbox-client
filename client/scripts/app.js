@@ -119,5 +119,8 @@ $(document).ready(function() {
 
   $('#send .submit').submit(app.handleSubmit);
 
-  $(document).on('click', '.username', app.handleUsernameClick); 
+  $(document).on('click', '.username', app.handleUsernameClick);
+  $('#refresh').click(function(event) {
+    app.changeRoom($('#roomSelect').val());
+  });
 });
