@@ -62,17 +62,18 @@ $(document).ready(function() {
     },
 
     handleSubmit: function(event) {
-      console.log(event);
       event.preventDefault();
       var username = location.search.replace('?username=', '');
       var roomname = $('#roomSelect').val();
-      var text = event.currentTarget[0].value;
+      var text = $('#message').val();
       var message = {
         username: username,
         text: text,
         roomname: roomname
       };
       app.send(message);
+      $('#message').val('');
+      app.changeRoom(roomname);
     },
     
     removeTags: function(html) {
