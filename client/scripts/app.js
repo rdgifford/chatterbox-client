@@ -1,15 +1,16 @@
 $(document).ready(function() {
   var app = {
-    server: 'https://api.parse.com/1/classes/messages?order=-createdAt&skip=400&limit=22',
+    server: 'https://api.parse.com/1/classes/messages',
+    getURL: '?order=-createdAt&skip=0&limit=1000',
     init: function() {
       this.fetch().done(function(data) {
         var rooms = _.filter(_.uniq(_.pluck(data.results, 'roomname')), x => typeof x === 'string');
         _.each(rooms, app.renderRoom);
-        // app.changeRoom(rooms[0], data.results);
+        app.changeRoom(rooms[0], data.results);
       });
     },  
 
-    send: function(message) {
+    send: function(message) { 
       $.ajax({
         url: this.server,
         type: 'POST',
@@ -19,18 +20,21 @@ $(document).ready(function() {
     },
 
     fetch: function() {
-      return $.get(this.server);
+      return $.get(this.server + this.getURL);
     },
 
     renderMessage: function(message) {
-      var domMes = 
-        '<div>' + 
-          '<a href="" onclick="app.handleUsernameClick()" class="username">' + 
-            message.username +
-          '</a>' +
-          '<p>' + message.text + '</p>' +
-        '</div>';
-      $('#chats').append(domMes);
+      message.text = app.removeTags(message.text);
+      if (message.text.length !== 0) {
+        var domMes = 
+          '<div>' + 
+            '<a href="" onclick="app.handleUsernameClick()" class="username">' + 
+              message.username +
+            '</a>' +
+            '<p>' + message.text + '</p>' +
+          '</div>';
+        $('#chats').append(domMes);
+      }
     },
 
     clearMessages: function() {
@@ -38,12 +42,14 @@ $(document).ready(function() {
     },
 
     renderRoom: function(room) {
-      var domRoom = '<option value="' + room + '">' + room + '</option>';
-      $('#roomSelect').append(domRoom);
+      room = app.removeTags(room);
+      if (room.length !== 0) {
+        var domRoom = '<option value="' + room + '">' + room + '</option>';
+        $('#roomSelect').append(domRoom);
+      }
     },
 
     changeRoom: function(room) {
-      // console.log('selected: ', room);
       app.clearMessages();
       this.fetch().done(function(data) {
         var filteredMessages = _.filter(data.results, x => x.roomname === room);
@@ -55,8 +61,43 @@ $(document).ready(function() {
 
     },
 
-    handleSubmit: function() {
-      console.log('invoked');
+    handleSubmit: function(event) {
+      console.log(event);
+      event.preventDefault();
+      var username = location.search.replace('?username=', '');
+      var roomname = $('#roomSelect').val();
+      var text = event.currentTarget[0].value;
+      var message = {
+        username: username,
+        text: text,
+        roomname: roomname
+      };
+      app.send(message);
+    },
+    
+    removeTags: function(html) {
+      var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
+
+      var tagOrComment = new RegExp(
+        '<(?:'
+        // Comment body.
+        + '!--(?:(?:-*[^->])*--+|-?)'
+        // Special "raw text" elements whose content should be elided.
+        + '|script\\b' + tagBody + '>[\\s\\S]*?</script\\s*'
+        + '|style\\b' + tagBody + '>[\\s\\S]*?</style\\s*'
+        // Regular name
+        + '|/?[a-z]'
+        + tagBody
+        + ')>',
+        'gi'
+      );
+
+      var oldHtml;
+      do {
+        oldHtml = html;
+        html = html.replace(tagOrComment, '');
+      } while (html !== oldHtml);
+      return html.replace(/</g, '&lt;');
     }
   };
 
@@ -66,8 +107,5 @@ $(document).ready(function() {
     app.changeRoom(event.currentTarget.value);
   });
 
-  $('#send .submit').submit(function(event) {
-    app.handleSubmit();
-    event.preventDefault();
-  });
+  $('#send .submit').submit(app.handleSubmit);
 });
