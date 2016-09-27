@@ -50,10 +50,12 @@ $(document).ready(function() {
     },
 
     changeRoom: function(room) {
+      $('.spinner').toggle();
       app.clearMessages();
       this.fetch().done(function(data) {
         var filteredMessages = _.filter(data.results, x => x.roomname === room);
         _.each(filteredMessages, app.renderMessage);
+        $('.spinner').toggle();
       });
     },
 
