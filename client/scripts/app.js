@@ -2,7 +2,7 @@ $(document).ready(function() {
   var app = {
     server: 'https://api.parse.com/1/classes/messages',
     getURL: '?order=-createdAt&skip=0&limit=1000',
-    friends: [],
+    friends: {},
     init: function() {
       this.fetch().done(function(data) {
         var rooms = _.filter(_.uniq(_.pluck(data.results, 'roomname')), x => typeof x === 'string');
@@ -25,18 +25,14 @@ $(document).ready(function() {
     },
 
     renderMessage: function(message) {
-      message.text = app.removeTags(message.text);
-      var usernameClass = _.contains(app.friends, message.username) ? 'username friend' : 'username';
-      if (message.text.length !== 0) {
-        var domMes = 
-          '<div>' + 
-            '<a href="" class="' + usernameClass + '">' + 
-              message.username +
-            '</a>' +
-            '<p>' + message.text + '</p>' +
-          '</div>';
-        $('#chats').append(domMes);
-      }
+      var usernameClass = app.friends[message.username] ? 'username friend' : 'username';
+
+      var $message = $('<div>')
+        .append($('<a>').addClass(usernameClass).text(message.username))
+        .append($('<p>').text(message.text))
+        .append($('<br>'));
+
+      $('#chats').append($message);
     },
 
     clearMessages: function() {
@@ -44,11 +40,8 @@ $(document).ready(function() {
     },
 
     renderRoom: function(room) {
-      room = app.removeTags(room);
-      if (room.length !== 0) {
-        var domRoom = '<option value="' + room + '">' + room + '</option>';
-        $('#roomSelect').append(domRoom);
-      }
+      var $room = $('<option>').val(room).text(room);
+      $('#roomSelect').append($room);
     },
 
     changeRoom: function(room) {
@@ -62,16 +55,17 @@ $(document).ready(function() {
     },
 
     handleUsernameClick: function(event) {
-      event.preventDefault();
-      var username = event.currentTarget.text;
-      if (!_.contains(app.friends, username)) {
-        app.friends.push(event.currentTarget.text);
+      var friend = event.currentTarget.text;
+      if (app.friends[friend]) {
+        delete app.friends[friend];
+      } else {
+        app.friends[friend] = true;
       }
       app.changeRoom($('#roomSelect').val());
+      event.preventDefault();
     },
 
     handleSubmit: function(event) {
-      event.preventDefault();
       var username = location.search.replace('?username=', '');
       var roomname = $('#roomSelect').val();
       var text = $('#message').val();
@@ -83,31 +77,21 @@ $(document).ready(function() {
       app.send(message);
       $('#message').val('');
       app.changeRoom(roomname);
+      event.preventDefault();
     },
-    
-    removeTags: function(html) {
-      var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
 
-      var tagOrComment = new RegExp(
-        '<(?:'
-        // Comment body.
-        + '!--(?:(?:-*[^->])*--+|-?)'
-        // Special "raw text" elements whose content should be elided.
-        + '|script\\b' + tagBody + '>[\\s\\S]*?</script\\s*'
-        + '|style\\b' + tagBody + '>[\\s\\S]*?</style\\s*'
-        // Regular name
-        + '|/?[a-z]'
-        + tagBody
-        + ')>',
-        'gi'
-      );
-
-      var oldHtml;
-      do {
-        oldHtml = html;
-        html = html.replace(tagOrComment, '');
-      } while (html !== oldHtml);
-      return html.replace(/</g, '&lt;');
+    newRoom: function(event) {
+      var roomname = window.prompt('Please enter a roomname:');
+      var username = location.search.replace('?username=', '');
+      var message = {
+        username: username,
+        text: 'New room created!',
+        roomname: roomname
+      };
+      app.renderRoom(roomname);
+      $('#roomSelect').val(roomname);
+      app.send(message);
+      app.changeRoom(roomname);
     }
   };
 
@@ -123,4 +107,6 @@ $(document).ready(function() {
   $('#refresh').click(function(event) {
     app.changeRoom($('#roomSelect').val());
   });
+
+  $('#newRoom').on('click', app.newRoom);
 });

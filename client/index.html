@@ -4,10 +4,14 @@
     <meta charset="utf-8">
     <title>chatterbox</title>
     <link rel="stylesheet" href="styles/styles.css">
-
     <!-- dependencies -->
+    <!-- Latest compiled and minified CSS -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script>
       // YOU DO NOT NEED TO EDIT THIS CODE
       if (!/(&|\?)username=/.test(window.location.search)) {
@@ -27,16 +31,19 @@
     <div id="main">
       <img class='spinner' src="images/spiffygif_46x46.gif"/>
       <h1>chatterbox</h1>
-      <select id="roomSelect">
+      <select id="roomSelect" class="selectpicker">
       </select>
       <div id="send">
         <form class="submit">
-          Message:
-          <input id="message" type="text">
-          <input type="submit">
+          <textarea class="form-control" rows="5" id="message"></textarea>
+          <br>
+          <input type="submit" class="btn btn-default">
+          <button type="button" class="btn btn-primary" id="refresh">
+            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" id="newRoom">New Room</button>
         </form>
       </div>
-      <button id="refresh">Refresh</button>
     </div>
     <div id="chats"></div>
   </body>
