@@ -20,6 +20,7 @@ body {
     font-size: 35px;
     margin-bottom: 5px;
     padding: 5px;
+    float: left;
 }
 
 #main h1 span {
@@ -47,7 +48,7 @@ body {
 }
 
 form {
-    padding: 20px;
+    padding: 0px;
     padding-left: 0;
     margin-bottom: 20px;
 }
@@ -92,4 +93,18 @@ form input[type=text] {
 
 .friend {
     color: #337ab7;
+}
+select {
+   margin: 50px;
+   float: right;
+   border: 1px solid #111;
+   background: transparent;
+   width: 150px;
+   padding: 5px 5px 5px 5px;
+   font-size: 16px;
+   border: 1px solid #ccc;
+   height: 34px;
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   appearance: none;
 }
